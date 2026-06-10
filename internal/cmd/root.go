@@ -79,7 +79,12 @@ func NewCmdRoot(f *factory.Factory) (*cobra.Command, error) {
 		player.NewCmdPause(f),
 		player.NewCmdNext(f),
 		player.NewCmdPrevious(f),
+		player.NewCmdSeek(f),
+		player.NewCmdShuffle(f),
+		player.NewCmdRepeat(f),
+		player.NewCmdLike(f),
 		player.NewCmdStatus(f),
+		player.NewCmdRecent(f),
 		volume.NewCmdVolume(f),
 		queue.NewCmdQueue(f),
 	)
