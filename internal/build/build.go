@@ -2,6 +2,7 @@ package build
 
 import (
 	"runtime/debug"
+	"time"
 
 	"github.com/matthew-collett/sp/internal/ui"
 )
@@ -25,7 +26,11 @@ func init() {
 		}
 	}
 	Version.Version = v
-	Version.Date = d
+	if t, err := time.Parse(time.RFC3339, d); err == nil {
+		Version.Date = t.UTC().Format("2006-01-02")
+	} else {
+		Version.Date = d
+	}
 }
 
 func (vi *VersionInfo) Style() *ui.Style {

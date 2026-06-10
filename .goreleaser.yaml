@@ -11,7 +11,7 @@ builds:
     ldflags:
       - -s -w
       - -X github.com/matthew-collett/sp/internal/build.v={{.Version}}
-      - -X github.com/matthew-collett/sp/internal/build.d={{ .CommitDate | date "2006-01-02" }}
+      - -X github.com/matthew-collett/sp/internal/build.d={{.CommitDate}}
     goos:
       - darwin
       - linux
@@ -28,17 +28,23 @@ archives:
 checksum:
   name_template: "checksums.txt"
 
-brews:
+homebrew_casks:
   - name: sp
     repository:
       owner: matthew-collett
       name: homebrew-sp
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     homepage: "https://github.com/matthew-collett/sp"
-    description: "A Spotify CLI"
+    description: "A fast, minimal Spotify CLI and MCP server for your terminal"
     license: "MIT"
-    install: |
-      bin.install "sp"
-      generate_completions_from_executable(bin/"sp", "completion")
-    test: |
-      system "#{bin}/sp", "--version"
+    binaries:
+      - sp
+    generate_completions_from_executable:
+      executable: "bin/sp"
+      args:
+        - completion
+      shell_parameter_format: cobra
+      shells:
+        - bash
+        - zsh
+        - fish
