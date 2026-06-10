@@ -1,16 +1,16 @@
 <div align="center">
 
-<img src="etc/img.svg" alt="sp demo" />
+<img width="400" src="etc/img.svg" alt="sp demo" />
 
-**A fast, minimal Spotify CLI for your terminal.**
+**A fast, minimal Spotify CLI for your terminal**
 
 [![Release](https://img.shields.io/github/v/release/matthew-collett/sp)](https://github.com/matthew-collett/sp/releases)
 [![Go](https://img.shields.io/github/go-mod/go-version/matthew-collett/sp)](go.mod)
 [![License](https://img.shields.io/github/license/matthew-collett/sp)](LICENSE)
 
-<img src="etc/demo.gif" alt="sp demo" />
+Control playback, search your library, manage devices, and save quick-play shortcuts — all without leaving the terminal.
 
-Control playback, search your library, manage devices, and save quick-launch shortcuts — all without leaving the terminal.
+<img src="etc/demo.gif" alt="sp demo" />
 
 </div>
 

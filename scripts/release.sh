@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-COMMITS=$(git log "${LAST_TAG}..HEAD" --pretty=format:"%s")
+LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+if [ -z "$LAST_TAG" ]; then
+  COMMITS=$(git log HEAD --pretty=format:"%s")
+else
+  COMMITS=$(git log "${LAST_TAG}..HEAD" --pretty=format:"%s")
+fi
 
 if [ -z "$COMMITS" ]; then
   echo "No commits since ${LAST_TAG}, skipping release."
@@ -22,6 +26,7 @@ while IFS= read -r msg; do
 done <<< "$COMMITS"
 
 VERSION=${LAST_TAG#v}
+VERSION=${VERSION:-0.0.0}
 MAJOR=$(echo "$VERSION" | cut -d. -f1)
 MINOR=$(echo "$VERSION" | cut -d. -f2)
 PATCH=$(echo "$VERSION" | cut -d. -f3)
