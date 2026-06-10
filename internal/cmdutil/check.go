@@ -31,10 +31,10 @@ func disableCheck(cmd *cobra.Command, annotation string) {
 
 func checkEnabled(cmd *cobra.Command, annotation string) bool {
 	skipCmds := []string{"sp", "help", "completion", cobra.ShellCompRequestCmd, cobra.ShellCompNoDescRequestCmd}
-	if slices.Contains(skipCmds, cmd.Name()) {
-		return false
-	}
-	for c := cmd; c.Parent() != nil; c = c.Parent() {
+	for c := cmd; c != nil; c = c.Parent() {
+		if slices.Contains(skipCmds, c.Name()) {
+			return false
+		}
 		if c.Annotations[annotation] == "true" {
 			return false
 		}
