@@ -39,8 +39,6 @@ brews:
     license: "MIT"
     install: |
       bin.install "sp"
-      bash_completion.install Utils.safe_popen_read(bin/"sp", "completion", "bash") => "sp"
-      zsh_completion.install Utils.safe_popen_read(bin/"sp", "completion", "zsh") => "_sp"
-      fish_completion.install Utils.safe_popen_read(bin/"sp", "completion", "fish") => "sp.fish"
+      generate_completions_from_executable(bin/"sp", "completion")
     test: |
       system "#{bin}/sp", "--version"
