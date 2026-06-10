@@ -1,0 +1,46 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: sp
+    main: ./cmd/sp
+    binary: sp
+    ldflags:
+      - -s -w
+      - -X github.com/matthew-collett/sp/internal/build.v={{.Version}}
+      - -X github.com/matthew-collett/sp/internal/build.d={{.Date}}
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - id: sp
+    formats:
+      - tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+brews:
+  - name: sp
+    repository:
+      owner: matthew-collett
+      name: homebrew-sp
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: "https://github.com/matthew-collett/sp"
+    description: "A Spotify CLI"
+    license: "MIT"
+    install: |
+      bin.install "sp"
+      bash_completion.install Utils.safe_popen_read(bin/"sp", "completion", "bash") => "sp"
+      zsh_completion.install Utils.safe_popen_read(bin/"sp", "completion", "zsh") => "_sp"
+      fish_completion.install Utils.safe_popen_read(bin/"sp", "completion", "fish") => "sp.fish"
+    test: |
+      system "#{bin}/sp", "--version"
