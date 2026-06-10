@@ -1,12 +1,12 @@
 module github.com/matthew-collett/sp
 
-go 1.23.2
+go 1.25.0
 
 require (
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/fatih/color v1.18.0
 	github.com/spf13/cobra v1.9.1
-	golang.org/x/oauth2 v0.30.0
+	golang.org/x/oauth2 v0.36.0
 	golang.org/x/term v0.32.0
 )
 
