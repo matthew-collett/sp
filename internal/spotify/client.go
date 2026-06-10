@@ -114,17 +114,66 @@ func (c *Client) GetQueue(ctx context.Context) (*QueueResponse, error) {
 	return &res, nil
 }
 
+func (c *Client) SetRepeat(ctx context.Context, deviceID string, state string) error {
+	opts := &RequestOptions{Params: url.Values{}}
+	opts.Params.Set("device_id", deviceID)
+	opts.Params.Set("state", state)
+	return c.put(ctx, repeat, nil, opts, nil)
+}
+
+func (c *Client) Seek(ctx context.Context, deviceID string, positionMS int) error {
+	opts := &RequestOptions{Params: url.Values{}}
+	opts.Params.Set("device_id", deviceID)
+	opts.Params.Set("position_ms", strconv.Itoa(positionMS))
+	return c.put(ctx, seek, nil, opts, nil)
+}
+
+func (c *Client) GetRecentlyPlayed(ctx context.Context) (*RecentlyPlayedResponse, error) {
+	opts := &RequestOptions{Params: url.Values{}}
+	opts.Params.Set("limit", "50")
+	var res RecentlyPlayedResponse
+	if err := c.get(ctx, recentlyPlayed, opts, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (c *Client) SaveTrack(ctx context.Context, id string) error {
+	opts := &RequestOptions{Params: url.Values{}}
+	opts.Params.Set("ids", id)
+	return c.put(ctx, tracks, nil, opts, nil)
+}
+
+func (c *Client) RemoveSavedTrack(ctx context.Context, id string) error {
+	opts := &RequestOptions{Params: url.Values{}}
+	opts.Params.Set("ids", id)
+	return c.delete(ctx, tracks, opts, nil)
+}
+
+func (c *Client) IsTrackSaved(ctx context.Context, id string) (bool, error) {
+	opts := &RequestOptions{Params: url.Values{}}
+	opts.Params.Set("ids", id)
+	var res []bool
+	if err := c.get(ctx, tracks+"/contains", opts, &res); err != nil {
+		return false, err
+	}
+	if len(res) == 0 {
+		return false, nil
+	}
+	return res[0], nil
+}
+
 func (c *Client) AddToQueue(ctx context.Context, uri string) error {
 	opts := &RequestOptions{Params: url.Values{}}
 	opts.Params.Set("uri", uri)
 	return c.post(ctx, queue, nil, opts, nil)
 }
 
-func (c *Client) Search(ctx context.Context, query string, types []string, limit int) (*SearchResponse, error) {
+func (c *Client) Search(ctx context.Context, query string, types []string) (*SearchResponse, error) {
 	opts := &RequestOptions{Params: url.Values{}}
 	opts.Params.Set("q", query)
 	opts.Params.Set("type", strings.Join(types, ","))
-	opts.Params.Set("limit", strconv.Itoa(limit))
+	opts.Params.Set("limit", "50")
 
 	var res SearchResponse
 	if err := c.get(ctx, search, opts, &res); err != nil {
@@ -225,6 +274,14 @@ func (c *Client) post(ctx context.Context, path string, body any, opts *RequestO
 
 func (c *Client) put(ctx context.Context, path string, body any, opts *RequestOptions, res any) error {
 	resp, err := c.do(ctx, http.MethodPut, path, body, opts)
+	if err != nil {
+		return err
+	}
+	return handleResponse(resp, res)
+}
+
+func (c *Client) delete(ctx context.Context, path string, opts *RequestOptions, res any) error {
+	resp, err := c.do(ctx, http.MethodDelete, path, nil, opts)
 	if err != nil {
 		return err
 	}

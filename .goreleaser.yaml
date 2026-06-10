@@ -11,7 +11,7 @@ builds:
     ldflags:
       - -s -w
       - -X github.com/matthew-collett/sp/internal/build.v={{.Version}}
-      - -X github.com/matthew-collett/sp/internal/build.d={{.Date}}
+      - -X github.com/matthew-collett/sp/internal/build.d={{ .CommitDate | date "2006-01-02" }}
     goos:
       - darwin
       - linux

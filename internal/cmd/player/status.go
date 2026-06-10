@@ -54,8 +54,12 @@ func runCmdStatus(ctx context.Context, opts *statusOpts) error {
 	if durationMS > 0 {
 		pct = int(float64(progressMS) / float64(durationMS) * 100)
 	}
+
+	filled := func(s string) *ui.Style { return ui.Text(s).Yellow() }
+	empty := func(s string) *ui.Style { return ui.Text(s).Dimmed() }
 	state := ui.Text("paused").Yellow()
 	if pb.IsPlaying {
+		filled = func(s string) *ui.Style { return ui.Text(s).Green() }
 		state = ui.Text("playing").Green()
 	}
 	shuffle := ui.Text("off").Dimmed()
@@ -71,8 +75,6 @@ func runCmdStatus(ctx context.Context, opts *statusOpts) error {
 	ui.StatusRow("album", ui.Text(track.Album.Name))
 	ui.StatusRow("device", ui.Text(pb.Device.Name), ui.Text("  •  vol %d%%", pb.Device.VolumePercent))
 
-	filled := func(s string) *ui.Style { return ui.Text(s).Yellow() }
-	empty := func(s string) *ui.Style { return ui.Text(s).Dimmed() }
 	ui.StatusRow("progress",
 		ui.Text("%s / %s  ", formatMS(progressMS), formatMS(durationMS)),
 		ui.ProgressBar(progressMS, durationMS, filled, empty),

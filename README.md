@@ -46,40 +46,38 @@ sp configure   # enter your credentials
 sp login       # authenticate via browser
 ```
 
-## Usage Examples
+## Useful Commands
 
 ### Playback
 
 ```sh
-sp play                    # resume
+sp status                  # show now playing, progress, shuffle, repeat
 sp play lofi               # play a shelf item by name
-sp pause                   # pause
-sp next                    # skip forward
-sp previous                # skip back
+sp play lofi --shuffle     # play shuffled
+sp like                    # save or unsave the current track
+sp shuffle                 # toggle shuffle
+sp repeat                  # cycle repeat (off → context → track)
+sp seek 1:30               # seek to 1m30s in the current track
+sp recent                  # show recently played tracks
+sp queue                   # show the current queue
+sp queue add spotify:track:4iV5W9uYEdYUVa79Axb7Rh
 sp volume 80               # set volume to 80%
-sp volume up               # increase by 10
-sp volume down 5           # decrease by 5
-sp status                  # show current status
 ```
 
 ### Search
 
 ```sh
 sp search tracks "dark side of the moon"
-sp search albums "abbey road"
-sp search tracks --mine    # search your saved tracks
 sp search albums --mine    # browse your saved albums
 sp search playlists --mine
 ```
 
 ### Shelf
 
-Save any Spotify URI as a named shortcut and launch it instantly.
-
 ```sh
 sp shelf add lofi spotify:playlist:37i9dQZF1DX3Ogo9pFvBkY
 sp shelf                   # list all shortcuts
-sp play lofi               # play by name
+sp play lofi               # play a shelf item instantly
 sp shelf drop lofi         # remove a shortcut
 ```
 
@@ -89,6 +87,7 @@ sp shelf drop lofi         # remove a shortcut
 sp devices                 # list available devices
 sp activate "MacBook Pro"  # switch playback device
 sp open                    # open Spotify on this device
+sp close                   # close Spotify on this device
 ```
 
 ## Contributing

@@ -1,21 +1,24 @@
 package spotify
 
 const (
-	me        = "/me"
-	devices   = "/me/player/devices"
-	player    = "/me/player"
-	play      = "/me/player/play"
-	pause     = "/me/player/pause"
-	next      = "/me/player/next"
-	previous  = "/me/player/previous"
-	volume    = "/me/player/volume"
-	queue     = "/me/player/queue"
-	shuffle   = "/me/player/shuffle"
-	search    = "/search"
-	tracks    = "/me/tracks"
-	albums    = "/me/albums"
-	playlists = "/me/playlists"
-	following = "/me/following"
+	me             = "/me"
+	devices        = "/me/player/devices"
+	player         = "/me/player"
+	play           = "/me/player/play"
+	pause          = "/me/player/pause"
+	next           = "/me/player/next"
+	previous       = "/me/player/previous"
+	seek           = "/me/player/seek"
+	volume         = "/me/player/volume"
+	shuffle        = "/me/player/shuffle"
+	repeat         = "/me/player/repeat"
+	queue          = "/me/player/queue"
+	recentlyPlayed = "/me/player/recently-played"
+	tracks         = "/me/tracks"
+	albums         = "/me/albums"
+	playlists      = "/me/playlists"
+	following      = "/me/following"
+	search         = "/search"
 )
 
 type User struct {
@@ -188,4 +191,13 @@ type FollowedArtistsResponse struct {
 type QueueResponse struct {
 	CurrentlyPlaying *Track  `json:"currently_playing"`
 	Queue            []Track `json:"queue"`
+}
+
+type PlayHistoryItem struct {
+	Track    Track  `json:"track"`
+	PlayedAt string `json:"played_at"`
+}
+
+type RecentlyPlayedResponse struct {
+	Items []PlayHistoryItem `json:"items"`
 }

@@ -33,7 +33,6 @@ type searchOpts struct {
 	typ     string
 	artist  string
 	mine    bool
-	limit   int
 	noPager bool
 }
 
@@ -56,9 +55,6 @@ func NewCmdSearch(f *factory.Factory) *cobra.Command {
 			} else if !opts.mine {
 				return errors.New("query required unless --mine is set")
 			}
-			if opts.mine && cmd.Flags().Changed("limit") {
-				return errors.New("--limit cannot be used with --mine")
-			}
 			sc, err := f.SpotifyClient(cmd.Context())
 			if err != nil {
 				return err
@@ -70,7 +66,6 @@ func NewCmdSearch(f *factory.Factory) *cobra.Command {
 
 	cmd.Flags().StringVarP(&opts.artist, "artist", "a", "", "filter by artist name")
 	cmd.Flags().BoolVarP(&opts.mine, "mine", "m", false, "search only your library")
-	cmd.Flags().IntVarP(&opts.limit, "limit", "l", 50, "number of results to show")
 	cmd.Flags().BoolVar(&opts.noPager, "no-pager", false, "disable pager for output")
 
 	return cmd
@@ -89,7 +84,7 @@ func searchSpotify(ctx context.Context, opts *searchOpts) error {
 		query = fmt.Sprintf("%s artist:%s", query, opts.artist)
 	}
 
-	res, err := opts.sc.Search(ctx, query, []string{opts.typ}, opts.limit)
+	res, err := opts.sc.Search(ctx, query, []string{opts.typ})
 	if err != nil {
 		return err
 	}

@@ -39,7 +39,5 @@ esac
 
 NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
 
-git config user.name "github-actions[bot]"
-git config user.email "github-actions[bot]@users.noreply.github.com"
 git tag "${NEW_VERSION}"
 git push origin "${NEW_VERSION}"
