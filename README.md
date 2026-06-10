@@ -18,6 +18,7 @@ Control playback, search your library, manage devices, and save quick-play short
 
 ```sh
 brew tap matthew-collett/sp
+brew trust matthew-collett/sp
 brew install sp
 ```
 

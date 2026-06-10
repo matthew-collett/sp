@@ -30,7 +30,7 @@ func disableCheck(cmd *cobra.Command, annotation string) {
 }
 
 func checkEnabled(cmd *cobra.Command, annotation string) bool {
-	skipCmds := []string{"sp", "help", cobra.ShellCompRequestCmd, cobra.ShellCompNoDescRequestCmd}
+	skipCmds := []string{"sp", "help", "completion", cobra.ShellCompRequestCmd, cobra.ShellCompNoDescRequestCmd}
 	if slices.Contains(skipCmds, cmd.Name()) {
 		return false
 	}
