@@ -18,6 +18,19 @@ builds:
     goarch:
       - amd64
       - arm64
+  - id: sp-mcp
+    main: ./cmd/sp-mcp
+    binary: sp-mcp
+    ldflags:
+      - -s -w
+      - -X github.com/matthew-collett/sp/internal/build.v={{.Version}}
+      - -X github.com/matthew-collett/sp/internal/build.d={{.CommitDate}}
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
 
 archives:
   - id: sp
@@ -39,6 +52,7 @@ homebrew_casks:
     license: "MIT"
     binaries:
       - sp
+      - sp-mcp
     generate_completions_from_executable:
       executable: "bin/sp"
       args:

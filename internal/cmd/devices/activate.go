@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/matthew-collett/sp/internal/cmdutil"
 	"github.com/matthew-collett/sp/internal/factory"
 	"github.com/matthew-collett/sp/internal/spotify"
 	"github.com/matthew-collett/sp/internal/ui"
@@ -46,7 +45,7 @@ func runCmdActivate(ctx context.Context, opts *activateOpts) error {
 	}
 
 	if len(resp.Devices) == 0 {
-		return cmdutil.ErrNoAvailableDevices
+		return spotify.ErrNoAvailableDevices
 	}
 
 	var device *spotify.Device

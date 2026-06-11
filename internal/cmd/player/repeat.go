@@ -3,7 +3,6 @@ package player
 import (
 	"context"
 
-	"github.com/matthew-collett/sp/internal/cmdutil"
 	"github.com/matthew-collett/sp/internal/factory"
 	"github.com/matthew-collett/sp/internal/spotify"
 	"github.com/matthew-collett/sp/internal/ui"
@@ -34,7 +33,7 @@ func NewCmdRepeat(f *factory.Factory) *cobra.Command {
 }
 
 func runCmdRepeat(ctx context.Context, opts *repeatOpts) error {
-	device, err := cmdutil.GetDevice(ctx, opts.sc)
+	device, err := spotify.GetDevice(ctx, opts.sc)
 	if err != nil {
 		return err
 	}
@@ -42,21 +41,10 @@ func runCmdRepeat(ctx context.Context, opts *repeatOpts) error {
 	if err != nil {
 		return err
 	}
-	next := nextRepeatState(pb.RepeatOn)
+	next := spotify.NextRepeatState(pb.RepeatOn)
 	if err := opts.sc.SetRepeat(ctx, device.ID, next); err != nil {
 		return err
 	}
 	ui.Success("Repeat %s", next).Show()
 	return nil
-}
-
-func nextRepeatState(current string) string {
-	switch current {
-	case "off":
-		return "context"
-	case "context":
-		return "track"
-	default:
-		return "off"
-	}
 }

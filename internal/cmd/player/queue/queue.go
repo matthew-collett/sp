@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/matthew-collett/sp/internal/cmdutil"
 	"github.com/matthew-collett/sp/internal/factory"
 	"github.com/matthew-collett/sp/internal/spotify"
 	"github.com/matthew-collett/sp/internal/ui"
@@ -55,7 +54,7 @@ func runCmdQueue(ctx context.Context, opts *queueOpts) error {
 		t.Row(
 			ui.Text("now").Dimmed().Fixed(),
 			ui.Text(res.CurrentlyPlaying.Name).Bold(),
-			ui.Text(cmdutil.JoinArtists(res.CurrentlyPlaying.Artists)).Fixed(),
+			ui.Text(spotify.JoinArtists(res.CurrentlyPlaying.Artists)).Fixed(),
 			ui.Text(res.CurrentlyPlaying.Album.Name).Dimmed().Fixed(),
 		)
 	}
@@ -64,7 +63,7 @@ func runCmdQueue(ctx context.Context, opts *queueOpts) error {
 		t.Row(
 			ui.Text(fmt.Sprintf("%d", i+1)).Dimmed().Fixed(),
 			ui.Text(track.Name).Bold(),
-			ui.Text(cmdutil.JoinArtists(track.Artists)).Fixed(),
+			ui.Text(spotify.JoinArtists(track.Artists)).Fixed(),
 			ui.Text(track.Album.Name).Dimmed().Fixed(),
 		)
 	}

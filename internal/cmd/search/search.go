@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/matthew-collett/sp/internal/cmdutil"
 	"github.com/matthew-collett/sp/internal/factory"
 	"github.com/matthew-collett/sp/internal/spotify"
 	"github.com/matthew-collett/sp/internal/ui"
@@ -99,8 +98,8 @@ func searchSpotify(ctx context.Context, opts *searchOpts) error {
 			for _, track := range res.Tracks.Items {
 				t.Row(
 					ui.Text(track.Name).Bold(),
-					ui.Text(cmdutil.JoinArtists(track.Artists)).Dimmed(),
-					ui.Text(formatDuration(track.DurationMs)).Dimmed().Fixed(),
+					ui.Text(spotify.JoinArtists(track.Artists)).Dimmed(),
+					ui.Text(spotify.FormatMS(track.DurationMs)).Dimmed().Fixed(),
 					ui.Text(track.URI).Yellow().Fixed(),
 				)
 			}
@@ -111,7 +110,7 @@ func searchSpotify(ctx context.Context, opts *searchOpts) error {
 			for _, album := range res.Albums.Items {
 				t.Row(
 					ui.Text(album.Name).Bold(),
-					ui.Text(cmdutil.JoinArtists(album.Artists)).Dimmed(),
+					ui.Text(spotify.JoinArtists(album.Artists)).Dimmed(),
 					ui.Text("%d", album.TotalTracks).Dimmed().Fixed(),
 					ui.Text(album.URI).Yellow().Fixed(),
 				)
@@ -175,8 +174,8 @@ func searchLibrary(ctx context.Context, opts *searchOpts) error {
 			}
 			t.Row(
 				ui.Text(saved.Track.Name).Bold(),
-				ui.Text(cmdutil.JoinArtists(saved.Track.Artists)).Dimmed(),
-				ui.Text(formatDuration(saved.Track.DurationMs)).Dimmed().Fixed(),
+				ui.Text(spotify.JoinArtists(saved.Track.Artists)).Dimmed(),
+				ui.Text(spotify.FormatMS(saved.Track.DurationMs)).Dimmed().Fixed(),
 				ui.Text(saved.Track.URI).Yellow().Fixed(),
 			)
 		}
@@ -192,7 +191,7 @@ func searchLibrary(ctx context.Context, opts *searchOpts) error {
 			}
 			t.Row(
 				ui.Text(saved.Album.Name).Bold(),
-				ui.Text(cmdutil.JoinArtists(saved.Album.Artists)).Dimmed(),
+				ui.Text(spotify.JoinArtists(saved.Album.Artists)).Dimmed(),
 				ui.Text("%d", saved.Album.TotalTracks).Dimmed().Fixed(),
 				ui.Text(saved.Album.URI).Yellow().Fixed(),
 			)
@@ -243,11 +242,6 @@ func searchLibrary(ctx context.Context, opts *searchOpts) error {
 
 	t.Render(!opts.noPager)
 	return nil
-}
-
-func formatDuration(ms int) string {
-	total := ms / 1000
-	return fmt.Sprintf("%d:%02d", total/60, total%60)
 }
 
 func formatNumber(n int) string {

@@ -3,7 +3,6 @@ package player
 import (
 	"context"
 
-	"github.com/matthew-collett/sp/internal/cmdutil"
 	"github.com/matthew-collett/sp/internal/factory"
 	"github.com/matthew-collett/sp/internal/spotify"
 	"github.com/matthew-collett/sp/internal/ui"
@@ -34,7 +33,7 @@ func NewCmdPause(f *factory.Factory) *cobra.Command {
 }
 
 func runCmdPause(ctx context.Context, opts *pauseOpts) error {
-	device, err := cmdutil.GetDevice(ctx, opts.sc)
+	device, err := spotify.GetDevice(ctx, opts.sc)
 	if err != nil {
 		return err
 	}

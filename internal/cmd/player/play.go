@@ -54,7 +54,7 @@ func NewCmdPlay(f *factory.Factory) *cobra.Command {
 }
 
 func runCmdPlay(ctx context.Context, opts *playOpts) error {
-	device, err := cmdutil.GetDevice(ctx, opts.sc)
+	device, err := spotify.GetDevice(ctx, opts.sc)
 	if err != nil {
 		return err
 	}
@@ -66,14 +66,14 @@ func runCmdPlay(ctx context.Context, opts *playOpts) error {
 
 	var name string
 	if opts.arg != "" {
-		if !cmdutil.ValidURI(opts.arg) && !opts.shelf.Has(opts.arg) {
+		if !spotify.ValidURI(opts.arg) && !opts.shelf.Has(opts.arg) {
 			return fmt.Errorf("%q is not a shelf item or a valid Spotify URI", opts.arg)
 		}
 		uri := opts.arg
 		if item, ok := opts.shelf.Get(opts.arg); ok {
 			uri, name = item.URI, item.Name
 		}
-		if cmdutil.IsTrack(uri) {
+		if spotify.IsTrack(uri) {
 			req.URIs = []string{uri}
 		} else {
 			req.ContextURI = uri

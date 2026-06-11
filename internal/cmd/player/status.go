@@ -2,9 +2,7 @@ package player
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/matthew-collett/sp/internal/cmdutil"
 	"github.com/matthew-collett/sp/internal/factory"
 	"github.com/matthew-collett/sp/internal/spotify"
 	"github.com/matthew-collett/sp/internal/ui"
@@ -35,7 +33,7 @@ func NewCmdStatus(f *factory.Factory) *cobra.Command {
 }
 
 func runCmdStatus(ctx context.Context, opts *statusOpts) error {
-	if _, err := cmdutil.GetDevice(ctx, opts.sc); err != nil {
+	if _, err := spotify.GetDevice(ctx, opts.sc); err != nil {
 		return err
 	}
 	pb, err := opts.sc.GetCurrentPlayback(ctx)
@@ -71,20 +69,15 @@ func runCmdStatus(ctx context.Context, opts *statusOpts) error {
 		repeat = ui.Text(pb.RepeatOn).Green()
 	}
 	ui.StatusRow("now playing", ui.Text(track.Name).Bold())
-	ui.StatusRow("artist", ui.Text(cmdutil.JoinArtists(track.Artists)))
+	ui.StatusRow("artist", ui.Text(spotify.JoinArtists(track.Artists)))
 	ui.StatusRow("album", ui.Text(track.Album.Name))
 	ui.StatusRow("device", ui.Text(pb.Device.Name), ui.Text("  •  vol %d%%", pb.Device.VolumePercent))
 
 	ui.StatusRow("progress",
-		ui.Text("%s / %s  ", formatMS(progressMS), formatMS(durationMS)),
+		ui.Text("%s / %s  ", spotify.FormatMS(progressMS), spotify.FormatMS(durationMS)),
 		ui.ProgressBar(progressMS, durationMS, filled, empty),
 		ui.Text("  %d%%", pct).Dimmed(),
 	)
 	ui.StatusRow("status", state, ui.Text("  •  shuffle "), shuffle, ui.Text("  •  repeat "), repeat)
 	return nil
-}
-
-func formatMS(ms int) string {
-	s := ms / 1000
-	return fmt.Sprintf("%d:%02d", s/60, s%60)
 }

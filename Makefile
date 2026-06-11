@@ -20,6 +20,7 @@ help:
 
 build:
 	go build $(LDFLAGS) -o build/$(BINARY) ./cmd/$(BINARY)
+	go build $(LDFLAGS) -o build/$(BINARY)-mcp ./cmd/$(BINARY)-mcp
 
 test:
 	go test -v ./...

@@ -5,14 +5,19 @@ go 1.25.0
 require (
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/fatih/color v1.19.0
+	github.com/modelcontextprotocol/go-sdk v1.6.1
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/oauth2 v0.36.0
 	golang.org/x/term v0.44.0
 )
 
 require (
+	github.com/google/jsonschema-go v0.4.3 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
+	github.com/segmentio/asm v1.1.3 // indirect
+	github.com/segmentio/encoding v0.5.4 // indirect
+	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	golang.org/x/text v0.4.0 // indirect
 )
 
