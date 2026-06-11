@@ -25,6 +25,8 @@ var scopes = []string{
 	"user-modify-playback-state",
 	"user-read-currently-playing",
 	"user-library-read",
+	"user-library-modify",
+	"user-read-recently-played",
 	"playlist-read-private",
 	"playlist-read-collaborative",
 	"user-follow-read",
