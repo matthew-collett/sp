@@ -41,7 +41,7 @@ archives:
 checksum:
   name_template: "checksums.txt"
 
-homebrew_casks:
+brews:
   - name: sp
     repository:
       owner: matthew-collett
@@ -50,15 +50,9 @@ homebrew_casks:
     homepage: "https://github.com/matthew-collett/sp"
     description: "A fast, minimal Spotify CLI and MCP server for your terminal"
     license: "MIT"
-    binaries:
-      - sp
-      - sp-mcp
-    generate_completions_from_executable:
-      executable: "bin/sp"
-      args:
-        - completion
-      shell_parameter_format: cobra
-      shells:
-        - bash
-        - zsh
-        - fish
+    install: |
+      bin.install "sp"
+      bin.install "sp-mcp"
+      generate_completions_from_executable(bin/"sp", "completion", shells: [:bash, :zsh, :fish])
+    test: |
+      system "#{bin}/sp", "--version"
