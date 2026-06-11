@@ -29,7 +29,7 @@ func (t *shelf) list(ctx context.Context, _ *mcp.CallToolRequest, _ any) (*mcp.C
 	var sb strings.Builder
 	sb.WriteString("Shelf items:\n")
 	for name, item := range sh.Items {
-		fmt.Fprintf(&sb, "- %s: %s\n", name, item.URI)
+		fmt.Fprintf(&sb, "- %s [%s]: %s\n", name, item.Type, item.URI)
 	}
 	return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: sb.String()}}}, nil, nil
 }

@@ -17,7 +17,7 @@ func RegisterControls(s *mcp.Server, f *factory.Factory) {
 	t := &controls{f}
 	mcp.AddTool(s, &mcp.Tool{Name: "toggle_shuffle", Description: "Toggle shuffle on or off for the current playback"}, t.shuffle)
 	mcp.AddTool(s, &mcp.Tool{Name: "cycle_repeat", Description: "Cycle repeat mode: off → context (repeat playlist) → track (repeat one)"}, t.repeat)
-	mcp.AddTool(s, &mcp.Tool{Name: "set_volume", Description: "Set the playback volume. volume is an integer from 0 to 100"}, t.volume)
+	mcp.AddTool(s, &mcp.Tool{Name: "set_volume", Description: "Set the playback volume (0–100)"}, t.volume)
 	mcp.AddTool(s, &mcp.Tool{Name: "like", Description: "Save or unsave the currently playing track in the user's library. Toggles based on current saved state"}, t.like)
 }
 

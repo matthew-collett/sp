@@ -16,7 +16,7 @@ type playback struct {
 func RegisterPlayback(s *mcp.Server, f *factory.Factory) {
 	t := &playback{f}
 	mcp.AddTool(s, &mcp.Tool{Name: "get_status", Description: "Get the current Spotify playback status including track, artist, album, device, volume, progress, shuffle, and repeat state"}, t.status)
-	mcp.AddTool(s, &mcp.Tool{Name: "play", Description: "Resume playback or play a shelf item by name. Pass name to play a specific shelf item, omit to resume current playback"}, t.play)
+	mcp.AddTool(s, &mcp.Tool{Name: "play", Description: "Resume playback, play a shelf item by name, or play a Spotify URI directly (e.g. spotify:track:..., spotify:album:..., spotify:playlist:...). Set shuffle=true to enable shuffle for albums and playlists"}, t.play)
 	mcp.AddTool(s, &mcp.Tool{Name: "pause", Description: "Pause Spotify playback"}, t.pause)
 	mcp.AddTool(s, &mcp.Tool{Name: "next", Description: "Skip to the next track"}, t.next)
 	mcp.AddTool(s, &mcp.Tool{Name: "previous", Description: "Go to the previous track"}, t.previous)
@@ -55,7 +55,8 @@ func (t *playback) status(ctx context.Context, _ *mcp.CallToolRequest, _ any) (*
 }
 
 type playInput struct {
-	Name string `json:"name"`
+	Name    string `json:"name"`
+	Shuffle bool   `json:"shuffle"`
 }
 
 func (t *playback) play(ctx context.Context, _ *mcp.CallToolRequest, in playInput) (*mcp.CallToolResult, any, error) {
@@ -68,28 +69,38 @@ func (t *playback) play(ctx context.Context, _ *mcp.CallToolRequest, in playInpu
 		return nil, nil, err
 	}
 	var req spotify.PlayPlaybackRequest
+	var name string
 	if in.Name != "" {
-		shelf, err := t.f.Shelf()
-		if err != nil {
-			return nil, nil, err
+		uri := in.Name
+		if !spotify.ValidURI(in.Name) {
+			shelf, err := t.f.Shelf()
+			if err != nil {
+				return nil, nil, err
+			}
+			item, ok := shelf.Get(in.Name)
+			if !ok {
+				return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("No shelf item named %q", in.Name)}}}, nil, nil
+			}
+			uri, name = item.URI, item.Name
 		}
-		item, ok := shelf.Get(in.Name)
-		if !ok {
-			return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("No shelf item named %q", in.Name)}}}, nil, nil
-		}
-		if spotify.IsTrack(item.URI) {
-			req.URIs = []string{item.URI}
+		if spotify.IsTrack(uri) {
+			req.URIs = []string{uri}
 		} else {
-			req.ContextURI = item.URI
+			req.ContextURI = uri
 		}
 	}
 	if err := sc.Play(ctx, device.ID, req); err != nil {
 		return nil, nil, err
 	}
-	if in.Name != "" {
-		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("Playing %s", in.Name)}}}, nil, nil
+	if in.Shuffle {
+		if err := sc.SetShuffle(ctx, device.ID, true); err != nil {
+			return nil, nil, err
+		}
 	}
-	return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "Playback resumed"}}}, nil, nil
+	if name != "" {
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("Playing %s", name)}}}, nil, nil
+	}
+	return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "Playing"}}}, nil, nil
 }
 
 func (t *playback) pause(ctx context.Context, _ *mcp.CallToolRequest, _ any) (*mcp.CallToolResult, any, error) {
