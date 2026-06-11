@@ -3,7 +3,6 @@ package player
 import (
 	"context"
 
-	"github.com/matthew-collett/sp/internal/cmdutil"
 	"github.com/matthew-collett/sp/internal/factory"
 	"github.com/matthew-collett/sp/internal/spotify"
 	"github.com/matthew-collett/sp/internal/ui"
@@ -51,7 +50,7 @@ func runCmdRecent(ctx context.Context, opts *recentOpts) error {
 	for _, item := range res.Items {
 		t.Row(
 			ui.Text(item.Track.Name).Bold(),
-			ui.Text(cmdutil.JoinArtists(item.Track.Artists)).Dimmed(),
+			ui.Text(spotify.JoinArtists(item.Track.Artists)).Dimmed(),
 			ui.Text(item.Track.Album.Name).Dimmed(),
 			ui.Text(item.Track.URI).Yellow().Fixed(),
 		)

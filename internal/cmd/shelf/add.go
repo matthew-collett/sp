@@ -6,6 +6,7 @@ import (
 	"github.com/matthew-collett/sp/internal/cmdutil"
 	"github.com/matthew-collett/sp/internal/config"
 	"github.com/matthew-collett/sp/internal/factory"
+	"github.com/matthew-collett/sp/internal/spotify"
 	"github.com/matthew-collett/sp/internal/ui"
 	"github.com/spf13/cobra"
 )
@@ -41,7 +42,7 @@ func NewCmdShelfAdd(f *factory.Factory) *cobra.Command {
 }
 
 func runCmdShelfAdd(opts *shelfAddOpts) error {
-	if !cmdutil.ValidURI(opts.uri) {
+	if !spotify.ValidURI(opts.uri) {
 		return fmt.Errorf("%q is not a valid Spotify URI", opts.uri)
 	}
 

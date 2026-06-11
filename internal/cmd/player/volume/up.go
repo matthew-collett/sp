@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/matthew-collett/sp/internal/cmdutil"
 	"github.com/matthew-collett/sp/internal/factory"
 	"github.com/matthew-collett/sp/internal/spotify"
 	"github.com/matthew-collett/sp/internal/ui"
@@ -52,7 +51,7 @@ func runCmdVolumeUp(ctx context.Context, opts *volumeUpOpts) error {
 	}
 
 	if state.Device.ID == "" {
-		return cmdutil.ErrNoActiveDevice
+		return spotify.ErrNoActiveDevice
 	}
 
 	v := clamp(state.Device.VolumePercent+opts.delta, 0, 100)

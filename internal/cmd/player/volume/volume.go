@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/matthew-collett/sp/internal/cmdutil"
 	"github.com/matthew-collett/sp/internal/factory"
 	"github.com/matthew-collett/sp/internal/spotify"
 	"github.com/matthew-collett/sp/internal/ui"
@@ -53,7 +52,7 @@ func runCmdVolume(ctx context.Context, opts *volumeOpts) error {
 	}
 
 	if state.Device.ID == "" {
-		return cmdutil.ErrNoActiveDevice
+		return spotify.ErrNoActiveDevice
 	}
 
 	if opts.volume == "" {

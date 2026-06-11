@@ -4,7 +4,6 @@ import (
 	"context"
 	"sort"
 
-	"github.com/matthew-collett/sp/internal/cmdutil"
 	"github.com/matthew-collett/sp/internal/factory"
 	"github.com/matthew-collett/sp/internal/spotify"
 	"github.com/matthew-collett/sp/internal/ui"
@@ -52,7 +51,7 @@ func runCmdDevices(ctx context.Context, opts *devicesOpts) error {
 	}
 
 	if len(resp.Devices) == 0 {
-		return cmdutil.ErrNoAvailableDevices
+		return spotify.ErrNoAvailableDevices
 	}
 
 	sort.Slice(resp.Devices, func(i, j int) bool {
