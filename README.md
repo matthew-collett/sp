@@ -4,10 +4,10 @@
 
 **A fast, minimal Spotify CLI and MCP server**
 
-[![Release](https://img.shields.io/github/v/release/matthew-collett/sp?color=059669)](https://github.com/matthew-collett/sp/releases)
-[![CI](https://img.shields.io/github/actions/workflow/status/matthew-collett/sp/ci.yaml)](https://github.com/matthew-collett/sp/actions)
-[![MCP](https://img.shields.io/badge/MCP-compatible-F87171)](https://modelcontextprotocol.io)
-[![License](https://img.shields.io/github/license/matthew-collett/sp?color=F97316)](LICENSE)
+[![release](https://img.shields.io/github/v/release/matthew-collett/sp?color=059669)](https://github.com/matthew-collett/sp/releases)
+[![ci](https://img.shields.io/github/actions/workflow/status/matthew-collett/sp/ci.yaml)](https://github.com/matthew-collett/sp/actions)
+[![mcp](https://img.shields.io/badge/mcp-compatible-F87171)](https://modelcontextprotocol.io)
+[![license](https://img.shields.io/github/license/matthew-collett/sp?color=F97316)](LICENSE)
 
 Control Spotify from your terminal or your LLM: search, queue, devices, playback, and quick-play shortcuts, from wherever you work.
 
