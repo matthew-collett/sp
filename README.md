@@ -64,37 +64,9 @@ sp login       # authenticate via browser
 claude mcp add sp --scope user -- sp-mcp
 ```
 
-### Gemini CLI
-
-Add to `~/.gemini/settings.json`:
-
-```json
-{
-  "mcpServers": {
-    "sp": {
-      "command": "sp-mcp"
-    }
-  }
-}
-```
-
-### Claude Desktop
-
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
-
-```json
-{
-  "mcpServers": {
-    "sp": {
-      "command": "sp-mcp"
-    }
-  }
-}
-```
-
 ### Other clients
 
-Any MCP-compatible client that supports stdio servers can use the same config — just consult your client's docs for where to put it:
+For any other MCP-compatible client, add this to your config file:
 
 ```json
 {
@@ -120,7 +92,7 @@ sp repeat                  # cycle repeat (off → context → track)
 sp seek 1:30               # seek to 1m30s in the current track
 sp recent                  # show recently played tracks
 sp queue                   # show the current queue
-sp queue add spotify:track:4iV5W9uYEdYUVa79Axb7Rh
+sp queue add spotify:...   # add to current queue
 sp volume 80               # set volume to 80%
 ```
 
@@ -135,10 +107,10 @@ sp search playlists --mine
 ### Shelf
 
 ```sh
-sp shelf add lofi spotify:playlist:37i9dQZF1DX3Ogo9pFvBkY
-sp shelf                   # list all shortcuts
-sp play lofi               # play a shelf item instantly
-sp shelf drop lofi         # remove a shortcut
+sp shelf add lofi spotify:... # add a shortcut
+sp shelf                      # list all shortcuts
+sp play lofi                  # play a shelf item instantly
+sp shelf drop lofi            # remove a shortcut
 ```
 
 ### Devices
