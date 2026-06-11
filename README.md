@@ -52,11 +52,11 @@ sp login       # authenticate via browser
 
 `sp-mcp` brings the same controls to any [MCP](https://modelcontextprotocol.io)-compatible LLM as native tools. Ask naturally instead of typing commands:
 
-- *"What's playing?"*
-- *"Put on my lofi shelf item"*
-- *"Skip this and like the next one"*
-- *"Turn shuffle on and set volume to 60"*
-- *"What have I been listening to recently?"*
+- "What's playing?"
+- "Put on my lofi from my shelf"
+- "Skip this and like the next one"
+- "Turn shuffle on and set volume to 60"
+- "What have I been listening to recently?"
 
 ### Claude Code
 
