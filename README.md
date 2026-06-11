@@ -4,9 +4,10 @@
 
 **A fast, minimal Spotify CLI and MCP server**
 
-[![Release](https://img.shields.io/github/v/release/matthew-collett/sp)](https://github.com/matthew-collett/sp/releases)
-[![Go](https://img.shields.io/github/go-mod/go-version/matthew-collett/sp)](go.mod)
-[![License](https://img.shields.io/github/license/matthew-collett/sp)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/matthew-collett/sp?color=059669)](https://github.com/matthew-collett/sp/releases)
+[![CI](https://img.shields.io/github/actions/workflow/status/matthew-collett/sp/ci.yaml)](https://github.com/matthew-collett/sp/actions)
+[![MCP](https://img.shields.io/badge/MCP-compatible-F87171)](https://modelcontextprotocol.io)
+[![License](https://img.shields.io/github/license/matthew-collett/sp?color=F97316)](LICENSE)
 
 Control Spotify from your terminal or your LLM: search, queue, devices, playback, and quick-play shortcuts, from wherever you work.
 
@@ -16,24 +17,23 @@ Control Spotify from your terminal or your LLM: search, queue, devices, playback
 
 ## Installation
 
+### macOS / Linux (Homebrew)
+
 ```sh
 brew tap matthew-collett/sp
 brew trust matthew-collett/sp
 brew install sp
 ```
 
-Installs both `sp` and `sp-mcp`.
-
-<details>
-<summary>Install from source</summary>
+### macOS / Linux (curl)
 
 ```sh
-git clone https://github.com/matthew-collett/sp
-cd sp
-make install
+curl -fsSL https://raw.githubusercontent.com/matthew-collett/sp/main/tools/install.sh | sh
 ```
 
-</details>
+Installs both `sp` and `sp-mcp` to `/usr/local/bin`.
+
+For other platforms, download pre-built binaries from the [releases page](https://github.com/matthew-collett/sp/releases).
 
 ## Setup
 
@@ -50,25 +50,61 @@ sp login       # authenticate via browser
 
 ## MCP Server
 
-`sp-mcp` brings the same controls to any [MCP](https://modelcontextprotocol.io)-compatible LLM as native tools. Configure your client to run it as a local stdio server:
-
-```json
-{
-  "mcpServers": {
-    "sp": {
-      "command": "/usr/local/bin/sp-mcp"
-    }
-  }
-}
-```
-
-Works with [Claude](https://claude.ai/download), [Claude Code](https://claude.ai/code), [Gemini CLI](https://github.com/google-gemini/gemini-cli), [OpenCode](https://opencode.ai), or any other MCP-compatible LLM. Ask naturally instead of typing commands:
+`sp-mcp` brings the same controls to any [MCP](https://modelcontextprotocol.io)-compatible LLM as native tools. Ask naturally instead of typing commands:
 
 - *"What's playing?"*
 - *"Put on my lofi shelf item"*
 - *"Skip this and like the next one"*
 - *"Turn shuffle on and set volume to 60"*
 - *"What have I been listening to recently?"*
+
+### Claude Code
+
+```sh
+claude mcp add sp --scope user -- sp-mcp
+```
+
+### Gemini CLI
+
+Add to `~/.gemini/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "sp": {
+      "command": "sp-mcp"
+    }
+  }
+}
+```
+
+### Claude Desktop
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+
+```json
+{
+  "mcpServers": {
+    "sp": {
+      "command": "sp-mcp"
+    }
+  }
+}
+```
+
+### Other clients
+
+Any MCP-compatible client that supports stdio servers can use the same config — just consult your client's docs for where to put it:
+
+```json
+{
+  "mcpServers": {
+    "sp": {
+      "command": "sp-mcp"
+    }
+  }
+}
+```
 
 ## Useful Commands
 
