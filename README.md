@@ -2,13 +2,13 @@
 
 <img width="400" src="etc/img.svg" alt="sp demo" />
 
-**A fast, minimal Spotify CLI and MCP server for your terminal**
+**A fast, minimal Spotify CLI and MCP server**
 
 [![Release](https://img.shields.io/github/v/release/matthew-collett/sp)](https://github.com/matthew-collett/sp/releases)
 [![Go](https://img.shields.io/github/go-mod/go-version/matthew-collett/sp)](go.mod)
 [![License](https://img.shields.io/github/license/matthew-collett/sp)](LICENSE)
 
-Control playback, search your library, manage devices, and save quick-play shortcuts — all without leaving the terminal. Or just ask your LLM.
+Control Spotify from your terminal or your LLM: search, queue, devices, playback, and quick-play shortcuts, from wherever you work.
 
 <img src="etc/demo.gif" alt="sp demo" />
 
@@ -50,9 +50,7 @@ sp login       # authenticate via browser
 
 ## MCP Server
 
-`sp-mcp` is an [MCP](https://modelcontextprotocol.io) server that exposes Spotify controls as tools for any MCP-compatible LLM.
-
-Configure your client to run `sp-mcp` as a local stdio server:
+`sp-mcp` brings the same controls to any [MCP](https://modelcontextprotocol.io)-compatible LLM as native tools. Configure your client to run it as a local stdio server:
 
 ```json
 {
@@ -64,7 +62,7 @@ Configure your client to run `sp-mcp` as a local stdio server:
 }
 ```
 
-Works with [Claude](https://claude.ai/download), [Claude Code](https://claude.ai/code), [Gemini CLI](https://github.com/google-gemini/gemini-cli), [OpenCode](https://opencode.ai), and any other MCP-compatible LLM. Then just ask:
+Works with [Claude](https://claude.ai/download), [Claude Code](https://claude.ai/code), [Gemini CLI](https://github.com/google-gemini/gemini-cli), [OpenCode](https://opencode.ai), or any other MCP-compatible LLM. Ask naturally instead of typing commands:
 
 - *"What's playing?"*
 - *"Put on my lofi shelf item"*
