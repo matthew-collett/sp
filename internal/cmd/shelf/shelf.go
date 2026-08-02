@@ -41,6 +41,7 @@ func NewCmdShelf(f *factory.Factory) *cobra.Command {
 		NewCmdShelfAdd(f),
 		NewCmdShelfDrop(f),
 		NewCmdShelfRename(f),
+		NewCmdShelfClear(f),
 	)
 
 	return cmd

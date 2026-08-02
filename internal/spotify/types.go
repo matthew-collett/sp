@@ -1,24 +1,26 @@
 package spotify
 
 const (
-	me             = "/me"
-	devices        = "/me/player/devices"
-	player         = "/me/player"
-	play           = "/me/player/play"
-	pause          = "/me/player/pause"
-	next           = "/me/player/next"
-	previous       = "/me/player/previous"
-	seek           = "/me/player/seek"
-	volume         = "/me/player/volume"
-	shuffle        = "/me/player/shuffle"
-	repeat         = "/me/player/repeat"
-	queue          = "/me/player/queue"
-	recentlyPlayed = "/me/player/recently-played"
-	tracks         = "/me/tracks"
-	albums         = "/me/albums"
-	playlists      = "/me/playlists"
-	following      = "/me/following"
-	search         = "/search"
+	me                     = "/me"
+	mePlayer               = "/me/player"
+	mePlayerDevices        = "/me/player/devices"
+	mePlayerPlay           = "/me/player/play"
+	mePlayerPause          = "/me/player/pause"
+	mePlayerNext           = "/me/player/next"
+	mePlayerPrevious       = "/me/player/previous"
+	mePlayerSeek           = "/me/player/seek"
+	mePlayerVolume         = "/me/player/volume"
+	mePlayerShuffle        = "/me/player/shuffle"
+	mePlayerRepeat         = "/me/player/repeat"
+	mePlayerQueue          = "/me/player/queue"
+	mePlayerRecentlyPlayed = "/me/player/recently-played"
+	meTracks               = "/me/tracks"
+	meAlbums               = "/me/albums"
+	mePlaylists            = "/me/playlists"
+	meFollowing            = "/me/following"
+	search                 = "/search"
+	playlists              = "/playlists"
+	artists                = "/artists"
 )
 
 type User struct {
@@ -90,6 +92,13 @@ type Album struct {
 	Name        string   `json:"name"`
 	Artists     []Artist `json:"artists"`
 	TotalTracks int      `json:"total_tracks"`
+	Images      []Image  `json:"images"`
+}
+
+type Image struct {
+	URL    string `json:"url"`
+	Width  int    `json:"width"`
+	Height int    `json:"height"`
 }
 
 type PlaylistTracks struct {

@@ -2,10 +2,15 @@ package ui
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"image"
+	_ "image/jpeg"
 	"io"
+	"net/http"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 	"unicode/utf8"
 
@@ -14,6 +19,13 @@ import (
 	"github.com/fatih/color"
 	"golang.org/x/term"
 )
+
+const (
+	minBoxWidth = 50
+	maxBoxWidth = 100
+)
+
+var spinnerFrames = [...]rune{'|', '/', '-', '\\'}
 
 type Style struct {
 	text       string
@@ -48,6 +60,23 @@ func Info(format string, args ...any) *Style {
 
 func Warning(format string, args ...any) *Style {
 	return Text("%s %s", Warn(), fmt.Sprintf(format, args...))
+}
+
+func Spinner(tick int, format string, args ...any) {
+	frame := Text(string(spinnerFrames[tick%len(spinnerFrames)])).Blue()
+	fmt.Printf("\r%s %s", Text(format, args...), frame)
+}
+
+func ClearLine() {
+	fmt.Print("\r\x1b[K")
+}
+
+func Print(s string) {
+	fmt.Print(s)
+}
+
+func ClearScreen() {
+	fmt.Print("\x1b[H\x1b[2J")
 }
 
 func Error(err error) *Style {
@@ -111,22 +140,12 @@ func Bool(v bool) *Style {
 	return Text("false").Red()
 }
 
-func StatusRow(label string, values ...fmt.Stringer) {
-	parts := make([]string, 0, len(values))
-	for _, v := range values {
-		parts = append(parts, v.String())
-	}
-	fmt.Printf("%s  %s\n", Text("%13s", label).Dimmed(), strings.Join(parts, ""))
+func Play() *Style {
+	return Text("▶")
 }
 
-func ProgressBar(progressMS, durationMS int, filledStyle, emptyStyle func(string) *Style) *Style {
-	const width = 20
-	filled := 0
-	if durationMS > 0 {
-		filled = min(int(float64(progressMS)/float64(durationMS)*float64(width)), width)
-	}
-	bar := filledStyle(strings.Repeat("█", filled)).String() + emptyStyle(strings.Repeat("░", width-filled)).String()
-	return Text(bar)
+func Pause() *Style {
+	return Text("⏸")
 }
 
 func (s *Style) Green() *Style {
@@ -151,6 +170,26 @@ func (s *Style) Blue() *Style {
 
 func (s *Style) HiBlue() *Style {
 	s.attributes = append(s.attributes, color.FgHiBlue)
+	return s
+}
+
+func (s *Style) Magenta() *Style {
+	s.attributes = append(s.attributes, color.FgMagenta)
+	return s
+}
+
+func (s *Style) White() *Style {
+	s.attributes = append(s.attributes, color.FgWhite)
+	return s
+}
+
+func (s *Style) BgGreen() *Style {
+	s.attributes = append(s.attributes, color.BgGreen)
+	return s
+}
+
+func (s *Style) BgBlack() *Style {
+	s.attributes = append(s.attributes, color.BgBlack)
 	return s
 }
 
@@ -209,6 +248,178 @@ func (s *Style) String() string {
 		return color.New(s.attributes...).Sprint(s.text)
 	}
 	return s.text
+}
+
+func Truncate(s string, width int) string {
+	r := []rune(s)
+	if width <= 0 {
+		return ""
+	}
+	if len(r) <= width {
+		return s
+	}
+	if width <= 3 {
+		return string(r[:width])
+	}
+	return string(r[:width-3]) + "..."
+}
+
+func Fit(main, extra string, width int) (string, string) {
+	main = Truncate(main, width)
+	room := width - len([]rune(main)) - 3
+	if room <= 0 {
+		return main, ""
+	}
+	return main, Truncate(extra, room)
+}
+
+func SideBySide(left, right []string, leftWidth int) []string {
+	blank := strings.Repeat(" ", leftWidth)
+	rows := max(len(left), len(right))
+	out := make([]string, rows)
+	for i := range out {
+		l, r := blank, ""
+		if i < len(left) {
+			l = left[i]
+		}
+		if i < len(right) {
+			r = right[i]
+		}
+		out[i] = l + "  " + r
+	}
+	return out
+}
+
+var reANSI = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+
+func visibleWidth(s string) int {
+	return utf8.RuneCountInString(reANSI.ReplaceAllString(s, ""))
+}
+
+type Box struct {
+	title string
+	width int
+	rows  []string
+}
+
+func NewBox(title string) *Box {
+	w, _, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		w = maxBoxWidth
+	}
+	return &Box{title: title, width: max(minBoxWidth, min(w, maxBoxWidth))}
+}
+
+func (b *Box) Width() int {
+	return b.width - 4
+}
+
+func (b *Box) Row(content string) {
+	b.rows = append(b.rows, content)
+}
+
+func (b *Box) Render() string {
+	var sb strings.Builder
+
+	label := " " + b.title + " "
+	dashes := max(b.width-2-visibleWidth(label), 0)
+	sb.WriteString("┌" + label + strings.Repeat("─", dashes) + "┐\n")
+
+	for _, content := range b.rows {
+		pad := max(b.Width()-visibleWidth(content), 0)
+		sb.WriteString("│ " + content + strings.Repeat(" ", pad) + " │\n")
+	}
+
+	sb.WriteString("└" + strings.Repeat("─", b.width-2) + "┘\n")
+	return sb.String()
+}
+
+func RenderImage(ctx context.Context, url string, cols, rows int) ([]string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := http.DefaultClient.Do(req) //nolint:gosec
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close() //nolint:errcheck
+
+	img, _, err := image.Decode(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("decode image: %w", err)
+	}
+	return renderHalfBlocks(img, cols, rows), nil
+}
+
+func renderHalfBlocks(img image.Image, cols, rows int) []string {
+	bounds := img.Bounds()
+	w, h := bounds.Dx(), bounds.Dy()
+
+	lines := make([]string, rows/2)
+	for row := range lines {
+		var b strings.Builder
+		for col := 0; col < cols; col++ {
+			tr, tg, tb := sampleAvg(img, bounds, w, h, cols, rows, col, row*2)
+			br, bg, bb := sampleAvg(img, bounds, w, h, cols, rows, col, row*2+1)
+			fmt.Fprintf(&b, "\x1b[38;2;%d;%d;%dm\x1b[48;2;%d;%d;%dm▀\x1b[0m", tr, tg, tb, br, bg, bb)
+		}
+		lines[row] = b.String()
+	}
+	return lines
+}
+
+func sampleAvg(img image.Image, bounds image.Rectangle, w, h, cols, rows, col, pixelRow int) (r, g, b uint8) {
+	x0 := bounds.Min.X + col*w/cols
+	x1 := bounds.Min.X + (col+1)*w/cols
+	y0 := bounds.Min.Y + pixelRow*h/rows
+	y1 := bounds.Min.Y + (pixelRow+1)*h/rows
+	if x1 <= x0 {
+		x1 = x0 + 1
+	}
+	if y1 <= y0 {
+		y1 = y0 + 1
+	}
+
+	var sr, sg, sb, n uint32
+	for y := y0; y < y1; y++ {
+		for x := x0; x < x1; x++ {
+			pr, pg, pb, _ := img.At(x, y).RGBA()
+			sr += pr >> 8
+			sg += pg >> 8
+			sb += pb >> 8
+			n++
+		}
+	}
+	return uint8(sr / n), uint8(sg / n), uint8(sb / n)
+}
+
+func ProgressBarOverlay(width int, progress float64, label string) string {
+	filled := max(min(int(progress*float64(width)), width), 0)
+
+	l := []rune(label)
+	start := max((width-len(l))/2, 0)
+	end := min(start+len(l), width)
+
+	var sb strings.Builder
+	for i := 0; i < width; i++ {
+		r := ' '
+		if i >= start && i < end {
+			r = l[i-start]
+		}
+
+		style := Text("%c", r)
+		if i < filled {
+			style = style.BgGreen()
+		} else {
+			style = style.BgBlack()
+		}
+		if i >= start && i < end {
+			style = style.White().Bold()
+		}
+		sb.WriteString(style.String())
+	}
+	return sb.String()
 }
 
 type row struct {

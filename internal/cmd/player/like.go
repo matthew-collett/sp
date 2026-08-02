@@ -50,12 +50,12 @@ func runCmdLike(ctx context.Context, opts *likeOpts) error {
 		if err := opts.sc.RemoveSavedTrack(ctx, track.ID); err != nil {
 			return err
 		}
-		ui.Success("Unliked %s", track.Name).Show()
+		ui.Success("Unliked %q", track.Name).Show()
 	} else {
 		if err := opts.sc.SaveTrack(ctx, track.ID); err != nil {
 			return err
 		}
-		ui.Success("Liked %s", track.Name).Show()
+		ui.Success("Liked %q", track.Name).Show()
 	}
 	return nil
 }

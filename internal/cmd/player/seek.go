@@ -42,9 +42,20 @@ func runCmdSeek(ctx context.Context, opts *seekOpts) error {
 	if err != nil {
 		return err
 	}
+
+	name := ""
+	if pb, err := opts.sc.GetCurrentPlayback(ctx); err == nil && pb.Item != nil {
+		name = pb.Item.Name
+	}
+
 	if err := opts.sc.Seek(ctx, device.ID, ms); err != nil {
 		return err
 	}
-	ui.Success("Seeked to %s", opts.position).Show()
+
+	if name != "" {
+		ui.Success("Seeked to %s in %q", opts.position, name).Show()
+	} else {
+		ui.Success("Seeked to %s", opts.position).Show()
+	}
 	return nil
 }

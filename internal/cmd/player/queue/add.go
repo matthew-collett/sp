@@ -46,7 +46,7 @@ func NewCmdQueueAdd(f *factory.Factory) *cobra.Command {
 }
 
 func runCmdQueueAdd(ctx context.Context, opts *queueAddOpts) error {
-	if !spotify.ValidURI(opts.arg) && !opts.shelf.Has(opts.arg) {
+	if _, _, err := spotify.ParseURI(opts.arg); err != nil && !opts.shelf.Has(opts.arg) {
 		return fmt.Errorf("%q is not a shelf item or a valid Spotify URI", opts.arg)
 	}
 
@@ -56,12 +56,23 @@ func runCmdQueueAdd(ctx context.Context, opts *queueAddOpts) error {
 		uri, name = item.URI, item.Name
 	}
 
-	if !spotify.IsTrack(uri) {
+	if kind, _, _ := spotify.ParseURI(uri); kind != "track" {
 		return fmt.Errorf("only tracks can be added to the queue")
 	}
 
 	if err := opts.sc.AddToQueue(ctx, uri); err != nil {
 		return err
+	}
+
+	if name == "" {
+		if q, err := opts.sc.GetQueue(ctx); err == nil {
+			for _, t := range q.Queue {
+				if t.URI == uri {
+					name = t.Name
+					break
+				}
+			}
+		}
 	}
 
 	if name != "" {
