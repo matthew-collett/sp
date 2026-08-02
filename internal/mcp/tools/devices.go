@@ -63,7 +63,7 @@ func (t *devices) activateDevice(ctx context.Context, _ *mcp.CallToolRequest, in
 			if err := sc.TransferPlayback(ctx, spotify.TransferPlaybackRequest{DeviceIDs: []string{d.ID}, Play: true}); err != nil {
 				return nil, nil, err
 			}
-			return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("Switched to %s", d.Name)}}}, nil, nil
+			return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("Switched to %q", d.Name)}}}, nil, nil
 		}
 	}
 	return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("No device found matching %q", in.Name)}}}, nil, nil

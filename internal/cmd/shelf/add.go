@@ -42,7 +42,7 @@ func NewCmdShelfAdd(f *factory.Factory) *cobra.Command {
 }
 
 func runCmdShelfAdd(opts *shelfAddOpts) error {
-	if !spotify.ValidURI(opts.uri) {
+	if _, _, err := spotify.ParseURI(opts.uri); err != nil {
 		return fmt.Errorf("%q is not a valid Spotify URI", opts.uri)
 	}
 

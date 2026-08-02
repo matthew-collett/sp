@@ -2,9 +2,9 @@ package config
 
 import (
 	"path/filepath"
-	"strings"
 
 	"github.com/matthew-collett/sp/internal/osutil"
+	"github.com/matthew-collett/sp/internal/spotify"
 )
 
 const shelfFile = "shelf"
@@ -55,10 +55,11 @@ func (s *Shelf) Add(name, uri string) bool {
 	if s.Has(name) {
 		return false
 	}
+	kind, _, _ := spotify.ParseURI(uri)
 	s.Items[name] = Item{
 		Name: name,
 		URI:  uri,
-		Type: uriType(uri),
+		Type: kind,
 	}
 	return true
 }
@@ -82,14 +83,10 @@ func (s *Shelf) Drop(name string) bool {
 	return true
 }
 
-func (s *Shelf) IsEmpty() bool {
-	return len(s.Items) == 0
+func (s *Shelf) Clear() {
+	s.Items = make(map[string]Item)
 }
 
-func uriType(uri string) string {
-	parts := strings.SplitN(uri, ":", 3)
-	if len(parts) == 3 {
-		return parts[1]
-	}
-	return "unknown"
+func (s *Shelf) IsEmpty() bool {
+	return len(s.Items) == 0
 }

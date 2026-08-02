@@ -72,7 +72,7 @@ func (t *playback) play(ctx context.Context, _ *mcp.CallToolRequest, in playInpu
 	var name string
 	if in.Name != "" {
 		uri := in.Name
-		if !spotify.ValidURI(in.Name) {
+		if _, _, err := spotify.ParseURI(in.Name); err != nil {
 			shelf, err := t.f.Shelf()
 			if err != nil {
 				return nil, nil, err
@@ -83,7 +83,7 @@ func (t *playback) play(ctx context.Context, _ *mcp.CallToolRequest, in playInpu
 			}
 			uri, name = item.URI, item.Name
 		}
-		if spotify.IsTrack(uri) {
+		if kind, _, _ := spotify.ParseURI(uri); kind == "track" {
 			req.URIs = []string{uri}
 		} else {
 			req.ContextURI = uri
@@ -98,7 +98,7 @@ func (t *playback) play(ctx context.Context, _ *mcp.CallToolRequest, in playInpu
 		}
 	}
 	if name != "" {
-		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("Playing %s", name)}}}, nil, nil
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("Playing %q", name)}}}, nil, nil
 	}
 	return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "Playing"}}}, nil, nil
 }
@@ -165,8 +165,18 @@ func (t *playback) seek(ctx context.Context, _ *mcp.CallToolRequest, in seekInpu
 	if err != nil {
 		return nil, nil, err
 	}
+
+	name := ""
+	if pb, err := sc.GetCurrentPlayback(ctx); err == nil && pb.Item != nil {
+		name = pb.Item.Name
+	}
+
 	if err := sc.Seek(ctx, device.ID, ms); err != nil {
 		return nil, nil, err
+	}
+
+	if name != "" {
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("Seeked to %s in %q", in.Position, name)}}}, nil, nil
 	}
 	return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("Seeked to %s", in.Position)}}}, nil, nil
 }

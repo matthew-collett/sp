@@ -37,9 +37,19 @@ func runCmdPause(ctx context.Context, opts *pauseOpts) error {
 	if err != nil {
 		return err
 	}
+	name := ""
+	if pb, err := opts.sc.GetCurrentPlayback(ctx); err == nil && pb.Item != nil {
+		name = pb.Item.Name
+	}
+
 	if err := opts.sc.Pause(ctx, device.ID); err != nil {
 		return err
 	}
-	ui.Success("Paused").Show()
+
+	if name != "" {
+		ui.Success("Paused %q", name).Show()
+	} else {
+		ui.Success("Paused").Show()
+	}
 	return nil
 }

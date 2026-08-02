@@ -64,16 +64,16 @@ func runCmdPlay(ctx context.Context, opts *playOpts) error {
 		req.PositionMS = opts.position * 1000
 	}
 
-	var name string
+	var name, uri string
 	if opts.arg != "" {
-		if !spotify.ValidURI(opts.arg) && !opts.shelf.Has(opts.arg) {
+		if _, _, err := spotify.ParseURI(opts.arg); err != nil && !opts.shelf.Has(opts.arg) {
 			return fmt.Errorf("%q is not a shelf item or a valid Spotify URI", opts.arg)
 		}
-		uri := opts.arg
+		uri = opts.arg
 		if item, ok := opts.shelf.Get(opts.arg); ok {
 			uri, name = item.URI, item.Name
 		}
-		if spotify.IsTrack(uri) {
+		if kind, _, _ := spotify.ParseURI(uri); kind == "track" {
 			req.URIs = []string{uri}
 		} else {
 			req.ContextURI = uri
@@ -90,8 +90,18 @@ func runCmdPlay(ctx context.Context, opts *playOpts) error {
 		}
 	}
 
+	if name == "" {
+		if uri == "" {
+			if pb, err := opts.sc.GetCurrentPlayback(ctx); err == nil && pb.Item != nil {
+				name = pb.Item.Name
+			}
+		} else {
+			name = spotify.URIName(ctx, opts.sc, uri)
+		}
+	}
+
 	if name != "" {
-		ui.Success("Playing %s", name).Show()
+		ui.Success("Playing %q", name).Show()
 	} else {
 		ui.Success("Playing").Show()
 	}

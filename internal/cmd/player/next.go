@@ -43,6 +43,15 @@ func runCmdNext(ctx context.Context, opts *nextOpts) error {
 	if err := opts.sc.Next(ctx, device.ID); err != nil {
 		return err
 	}
-	ui.Success("Next track").Show()
+
+	name := ""
+	if pb, err := spotify.GetCurrentPlaybackDelayed(ctx, opts.sc); err == nil && pb.Item != nil {
+		name = pb.Item.Name
+	}
+	if name != "" {
+		ui.Success("Next track: %q", name).Show()
+	} else {
+		ui.Success("Next track").Show()
+	}
 	return nil
 }

@@ -69,6 +69,6 @@ func runCmdActivate(ctx context.Context, opts *activateOpts) error {
 		}
 	}
 
-	ui.Success("Activated %s", device.Name).Show()
+	ui.Success("Activated %q", device.Name).Show()
 	return nil
 }

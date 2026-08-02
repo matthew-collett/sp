@@ -6,14 +6,17 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 )
 
 var (
-	reURI = regexp.MustCompile(`^spotify:(track|album|playlist|artist):[a-zA-Z0-9]+$`)
+	reURI = regexp.MustCompile(`^spotify:(track|album|playlist|artist):([a-zA-Z0-9]+)$`)
 
 	ErrNoActiveDevice     = errors.New("no active playback device \nrun \"sp devices\" to see available devices\nrun \"sp activate <name>\" to activate one")
 	ErrNoAvailableDevices = errors.New("no devices found\nrun \"sp open\" to open spotify on this device")
 )
+
+const playbackDelay = 500 * time.Millisecond
 
 func GetDevice(ctx context.Context, sc *Client) (*Device, error) {
 	resp, err := sc.GetDevices(ctx)
@@ -31,12 +34,37 @@ func GetDevice(ctx context.Context, sc *Client) (*Device, error) {
 	return nil, ErrNoActiveDevice
 }
 
-func ValidURI(uri string) bool {
-	return reURI.MatchString(uri)
+func ParseURI(uri string) (kind, id string, err error) {
+	if m := reURI.FindStringSubmatch(uri); m != nil {
+		return m[1], m[2], nil
+	}
+	return "", "", fmt.Errorf("invalid spotify uri: %q", uri)
 }
 
-func IsTrack(uri string) bool {
-	return strings.HasPrefix(uri, "spotify:track:")
+func GetCurrentPlaybackDelayed(ctx context.Context, sc *Client) (*CurrentPlayback, error) {
+	time.Sleep(playbackDelay)
+	return sc.GetCurrentPlayback(ctx)
+}
+
+func URIName(ctx context.Context, sc *Client, uri string) string {
+	kind, id, err := ParseURI(uri)
+	if err != nil {
+		return ""
+	}
+	if kind == "playlist" {
+		if pl, err := sc.GetPlaylist(ctx, id); err == nil {
+			return pl.Name
+		}
+		return ""
+	}
+	pb, err := GetCurrentPlaybackDelayed(ctx, sc)
+	if err != nil || pb.Item == nil {
+		return ""
+	}
+	if kind == "album" {
+		return pb.Item.Album.Name
+	}
+	return pb.Item.Name
 }
 
 func JoinArtists(artists []Artist) string {

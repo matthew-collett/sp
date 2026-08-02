@@ -103,10 +103,10 @@ func (t *controls) like(ctx context.Context, _ *mcp.CallToolRequest, _ any) (*mc
 		if err := sc.RemoveSavedTrack(ctx, pb.Item.ID); err != nil {
 			return nil, nil, err
 		}
-		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("Unliked %s", pb.Item.Name)}}}, nil, nil
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("Unliked %q", pb.Item.Name)}}}, nil, nil
 	}
 	if err := sc.SaveTrack(ctx, pb.Item.ID); err != nil {
 		return nil, nil, err
 	}
-	return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("Liked %s", pb.Item.Name)}}}, nil, nil
+	return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("Liked %q", pb.Item.Name)}}}, nil, nil
 }

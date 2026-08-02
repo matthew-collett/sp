@@ -55,8 +55,8 @@ func (t *queue) addToQueue(ctx context.Context, _ *mcp.CallToolRequest, in addTo
 		return nil, nil, err
 	}
 	uri := in.URI
-	name := in.URI
-	if !spotify.ValidURI(in.URI) {
+	var name string
+	if _, _, err := spotify.ParseURI(in.URI); err != nil {
 		shelf, err := t.f.Shelf()
 		if err != nil {
 			return nil, nil, err
@@ -68,13 +68,26 @@ func (t *queue) addToQueue(ctx context.Context, _ *mcp.CallToolRequest, in addTo
 		uri = item.URI
 		name = item.Name
 	}
-	if !spotify.IsTrack(uri) {
+	if kind, _, _ := spotify.ParseURI(uri); kind != "track" {
 		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "Only tracks can be added to the queue"}}}, nil, nil
 	}
 	if err := sc.AddToQueue(ctx, uri); err != nil {
 		return nil, nil, err
 	}
-	return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("Added %s to queue", name)}}}, nil, nil
+	if name == "" {
+		if q, err := sc.GetQueue(ctx); err == nil {
+			for _, t := range q.Queue {
+				if t.URI == uri {
+					name = t.Name
+					break
+				}
+			}
+		}
+	}
+	if name != "" {
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("Added %q to queue", name)}}}, nil, nil
+	}
+	return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "Added to queue"}}}, nil, nil
 }
 
 func (t *queue) getRecent(ctx context.Context, _ *mcp.CallToolRequest, _ any) (*mcp.CallToolResult, any, error) {
