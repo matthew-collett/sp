@@ -16,8 +16,7 @@ const (
 var ErrNoConfig = errors.New(`spotify credentials not configured. run "sp configure"`)
 
 type Credentials struct {
-	ClientID     string `json:"client_id"`
-	ClientSecret string `json:"client_secret"`
+	ClientID string `json:"client_id"`
 }
 
 type Config struct {
@@ -48,11 +47,14 @@ func (c *Config) Remove() error {
 	if err := os.Remove(c.path); err != nil && !os.IsNotExist(err) {
 		return err
 	}
+	if err := os.Remove(filepath.Join(filepath.Dir(c.path), tokenFile)); err != nil && !os.IsNotExist(err) {
+		return err
+	}
 	return nil
 }
 
 func (c *Config) IsConfigured() bool {
-	return c.Credentials.ClientID != "" && c.Credentials.ClientSecret != ""
+	return c.Credentials.ClientID != ""
 }
 
 func Dir() (string, error) {

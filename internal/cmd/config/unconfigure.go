@@ -47,7 +47,7 @@ func runCmdUnconfigure(opts *unconfigureOpts) error {
 	}
 
 	if !opts.force {
-		ui.Warning("This will remove your Spotify API credentials").Show()
+		ui.Warning("This will remove your Spotify API credentials and log you out").Show()
 		yes, err := ui.PromptConfirm("Are you sure?")
 		if err != nil {
 			return errors.New("prompt failed")
@@ -62,6 +62,6 @@ func runCmdUnconfigure(opts *unconfigureOpts) error {
 		return errors.New("failed to cleanup configuration")
 	}
 
-	ui.Success("Configuration removed").Show()
+	ui.Success("Configuration and login removed").Show()
 	return nil
 }

@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/matthew-collett/sp/internal/cmdutil"
 	"github.com/matthew-collett/sp/internal/config"
@@ -17,10 +16,9 @@ const (
 )
 
 type configureOpts struct {
-	force        bool
-	clientID     string
-	clientSecret string
-	cfg          *config.Config
+	force    bool
+	clientID string
+	cfg      *config.Config
 }
 
 func NewCmdConfigure(f *factory.Factory) *cobra.Command {
@@ -44,7 +42,6 @@ func NewCmdConfigure(f *factory.Factory) *cobra.Command {
 	cmdutil.DisableAuthCheck(cmd)
 
 	cmd.Flags().StringVarP(&opts.clientID, "client-id", "c", "", "spotify client ID")
-	cmd.Flags().StringVarP(&opts.clientSecret, "client-secret", "s", "", "spotify client secret")
 	cmd.Flags().BoolVarP(&opts.force, "force", "f", false, "force overwrite existing configuration")
 
 	return cmd
@@ -54,7 +51,6 @@ func runCmdConfigure(opts *configureOpts) error {
 	if !opts.force && opts.cfg.IsConfigured() {
 		ui.Success("sp is already configured!").Show()
 		ui.Info("Client ID: %s", opts.cfg.Credentials.ClientID).Show()
-		ui.Info("Client Secret: %s", strings.Repeat("*", len(opts.cfg.Credentials.ClientSecret))).Show()
 
 		yes, err := ui.PromptConfirm("Would you like to reconfigure?")
 		if err != nil {
@@ -82,25 +78,11 @@ func runCmdConfigure(opts *configureOpts) error {
 		return errors.New("client ID cannot be empty")
 	}
 
-	if opts.clientSecret == "" {
-		clientSecret, err := ui.PromptSecret("Enter your Spotify Client Secret")
-		if err != nil {
-			return errors.New("prompt failed")
-		}
-		opts.clientSecret = clientSecret
-	}
-	if opts.clientSecret == "" {
-		return errors.New("client secret cannot be empty")
+	if len(opts.clientID) < minCredentialLength {
+		return errors.New("client ID seems too short. Please check and try again")
 	}
 
-	if len(opts.clientID) < minCredentialLength || len(opts.clientSecret) < minCredentialLength {
-		return errors.New("credentials seem too short. Please check and try again")
-	}
-
-	opts.cfg.Credentials = config.Credentials{
-		ClientID:     opts.clientID,
-		ClientSecret: opts.clientSecret,
-	}
+	opts.cfg.Credentials = config.Credentials{ClientID: opts.clientID}
 
 	if err := opts.cfg.Write(); err != nil {
 		return errors.New("failed to save configuration")
