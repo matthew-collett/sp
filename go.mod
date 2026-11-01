@@ -1,6 +1,6 @@
 module github.com/matthew-collett/sp
 
-go 1.26.0
+go 1.26.10
 
 require (
 	github.com/MakeNowJust/heredoc v1.0.0
