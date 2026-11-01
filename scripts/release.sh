@@ -41,3 +41,7 @@ NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
 
 git tag "${NEW_VERSION}"
 git push origin "${NEW_VERSION}"
+
+if [ -n "${GITHUB_OUTPUT:-}" ]; then
+  echo "tag=${NEW_VERSION}" >> "${GITHUB_OUTPUT}"
+fi

@@ -1,10 +1,10 @@
 repos:
   - repo: https://github.com/dnephin/pre-commit-golang
-    rev: v0.5.1
+    rev: fb24a639f7c938759fe56eeebbb7713b69d60494 # frozen: v0.5.1
     hooks:
       - id: go-mod-tidy
       - id: go-fmt
   - repo: https://github.com/golangci/golangci-lint
-    rev: v2.12.2
+    rev: c0d3ddc9cf3faa61a4e378e879ece580256d76e5 # frozen: v2.12.2
     hooks:
       - id: golangci-lint
