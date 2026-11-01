@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/matthew-collett/sp/internal/osutil"
 	"golang.org/x/oauth2"
@@ -18,7 +19,10 @@ const (
 	RedirectURL = "http://127.0.0.1:8080/callback"
 )
 
-var ErrNotAuthenticated = errors.New(`not authenticated. run "sp login"`)
+var (
+	ErrNotAuthenticated = errors.New(`not authenticated. run "sp login"`)
+	ErrInvalidState     = errors.New("invalid state parameter")
+)
 
 var scopes = []string{
 	"user-read-playback-state",
@@ -35,47 +39,46 @@ var scopes = []string{
 type Auth struct {
 	tokenPath string
 	oauth     *oauth2.Config
-	source    oauth2.TokenSource
-	token     *oauth2.Token
+	source    *tokenSource
+	verifier  string
 }
 
-func NewAuth(clientID, clientSecret string) (*Auth, error) {
+func NewAuth(clientID string) (*Auth, error) {
 	dir, err := Dir()
 	if err != nil {
 		return nil, err
 	}
 	tokenPath := filepath.Join(dir, tokenFile)
 	oauthCfg := &oauth2.Config{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		RedirectURL:  RedirectURL,
-		Scopes:       scopes,
+		ClientID:    clientID,
+		RedirectURL: RedirectURL,
+		Scopes:      scopes,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  authURL,
-			TokenURL: tokenURL,
+			AuthURL:   authURL,
+			TokenURL:  tokenURL,
+			AuthStyle: oauth2.AuthStyleInParams,
 		},
-	}
-	token := &oauth2.Token{}
-	osutil.ReadFileSilent(tokenPath, token)
-	ts := &tokenSource{
-		source:    oauthCfg.TokenSource(context.Background(), token),
-		tokenPath: tokenPath,
-		last:      token.AccessToken,
 	}
 	return &Auth{
 		tokenPath: tokenPath,
 		oauth:     oauthCfg,
-		source:    oauth2.ReuseTokenSource(token, ts),
-		token:     token,
+		source:    &tokenSource{oauth: oauthCfg, tokenPath: tokenPath},
 	}, nil
 }
 
 func (a *Auth) AuthURL(state string) string {
-	return a.oauth.AuthCodeURL(state, oauth2.SetAuthURLParam("show_dialog", "true"))
+	a.verifier = oauth2.GenerateVerifier()
+	return a.oauth.AuthCodeURL(state,
+		oauth2.S256ChallengeOption(a.verifier),
+		oauth2.SetAuthURLParam("show_dialog", "true"),
+	)
 }
 
 func (a *Auth) Exchange(ctx context.Context, r *http.Request, state string) error {
 	q := r.URL.Query()
+	if q.Get("state") != state {
+		return ErrInvalidState
+	}
 	if e := q.Get("error"); e != "" {
 		if e == "access_denied" {
 			return errors.New("authentication cancelled by user")
@@ -86,19 +89,10 @@ func (a *Auth) Exchange(ctx context.Context, r *http.Request, state string) erro
 	if code == "" {
 		return errors.New("no authorization code received")
 	}
-	if q.Get("state") != state {
-		return errors.New("invalid state parameter")
-	}
-	token, err := a.oauth.Exchange(ctx, code)
+	token, err := a.oauth.Exchange(ctx, code, oauth2.VerifierOption(a.verifier))
 	if err != nil {
 		return err
 	}
-	a.token = token
-	a.source = oauth2.ReuseTokenSource(token, &tokenSource{
-		source:    a.oauth.TokenSource(ctx, token),
-		tokenPath: a.tokenPath,
-		last:      token.AccessToken,
-	})
 	return osutil.WriteFile(token, a.tokenPath, 0600)
 }
 
@@ -110,11 +104,11 @@ func (a *Auth) HTTPClient(ctx context.Context) (*http.Client, error) {
 }
 
 func (a *Auth) IsAuthenticated() bool {
-	return a.token != nil && a.token.AccessToken != "" && a.token.RefreshToken != ""
+	token := readToken(a.tokenPath)
+	return token.AccessToken != "" && token.RefreshToken != ""
 }
 
 func (a *Auth) Logout() error {
-	a.token = &oauth2.Token{}
 	if err := os.Remove(a.tokenPath); err != nil && !os.IsNotExist(err) {
 		return err
 	}
@@ -122,19 +116,38 @@ func (a *Auth) Logout() error {
 }
 
 type tokenSource struct {
-	source    oauth2.TokenSource
+	mu        sync.Mutex
+	oauth     *oauth2.Config
 	tokenPath string
-	last      string
 }
 
 func (s *tokenSource) Token() (*oauth2.Token, error) {
-	token, err := s.source.Token()
-	if err != nil {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	token := readToken(s.tokenPath)
+	if token.RefreshToken == "" {
 		return nil, ErrNotAuthenticated
 	}
-	if token.AccessToken != s.last {
-		s.last = token.AccessToken
-		_ = osutil.WriteFile(token, s.tokenPath, 0600)
+	if token.Valid() {
+		return token, nil
 	}
-	return token, nil
+
+	refreshed, err := s.oauth.TokenSource(context.Background(), token).Token()
+	if err != nil {
+		if current := readToken(s.tokenPath); current.Valid() {
+			return current, nil
+		}
+		return nil, ErrNotAuthenticated
+	}
+	if err := osutil.OverwriteFile(refreshed, s.tokenPath); err != nil {
+		return nil, ErrNotAuthenticated
+	}
+	return refreshed, nil
+}
+
+func readToken(path string) *oauth2.Token {
+	token := &oauth2.Token{}
+	osutil.ReadFileSilent(path, token)
+	return token
 }

@@ -13,8 +13,8 @@ func OpenBrowser(url string) error {
 
 	switch runtime.GOOS {
 	case "windows":
-		cmd = "cmd"
-		args = []string{"/c", "start"}
+		cmd = "rundll32"
+		args = []string{"url.dll,FileProtocolHandler"}
 	case "darwin":
 		cmd = "open"
 	default: // "linux", "freebsd", "openbsd", "netbsd"
@@ -74,12 +74,25 @@ func WriteFile(data any, path string, perms os.FileMode) error {
 	return nil
 }
 
+func OverwriteFile(data any, path string) error {
+	contents, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC, 0)
+	if err != nil {
+		return err
+	}
+	if _, err := f.Write(contents); err != nil {
+		f.Close() //nolint:errcheck
+		return err
+	}
+
+	return f.Close()
+}
+
 func ReadFileSilent(path string, res any) {
 	data, _ := os.ReadFile(path)
 	_ = json.Unmarshal(data, res)
-}
-
-func ReadFileSilentString(path string) string {
-	data, _ := os.ReadFile(path)
-	return string(data)
 }

@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"time"
 
@@ -80,6 +81,11 @@ func runCmdLogin(ctx context.Context, f *factory.Factory, opts *loginOpts) error
 		return errors.New("failed to start login flow")
 	}
 
+	ln, err := net.Listen("tcp", "127.0.0.1:8080")
+	if err != nil {
+		return errors.New("failed to start login callback server, is port 8080 in use?")
+	}
+
 	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 
@@ -92,7 +98,9 @@ func runCmdLogin(ctx context.Context, f *factory.Factory, opts *loginOpts) error
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprint(w, authErrorHTML) //nolint:errcheck
-			tokenChan <- err
+			if !errors.Is(err, config.ErrInvalidState) {
+				tokenChan <- err
+			}
 			return
 		}
 		fmt.Fprint(w, authSuccessHTML) //nolint:errcheck
@@ -100,20 +108,17 @@ func runCmdLogin(ctx context.Context, f *factory.Factory, opts *loginOpts) error
 	})
 
 	server := &http.Server{
-		Addr:         ":8080",
 		Handler:      mux,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
-	go server.ListenAndServe() //nolint:errcheck
+	go server.Serve(ln) //nolint:errcheck
 	defer func() {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		server.Shutdown(shutdownCtx) //nolint:errcheck
 	}()
-
-	time.Sleep(100 * time.Millisecond)
 
 	authURL := opts.auth.AuthURL(state)
 	if !opts.noBrowser {

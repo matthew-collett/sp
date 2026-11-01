@@ -53,7 +53,7 @@ func authFunc(f *Factory) func() (*config.Auth, error) {
 		if cached == nil && err == nil {
 			var cfg *config.Config
 			if cfg, err = f.Config(); err == nil {
-				cached, err = config.NewAuth(cfg.Credentials.ClientID, cfg.Credentials.ClientSecret)
+				cached, err = config.NewAuth(cfg.Credentials.ClientID)
 			}
 		}
 		return cached, err

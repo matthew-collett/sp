@@ -42,11 +42,11 @@ For other platforms, download pre-built binaries from the [releases page](https:
 Playback control (play, pause, skip, queue, volume, etc.) requires a Spotify Premium account. Free-tier accounts will get 403 errors from those endpoints.
 
 1. Create an app at the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
-2. Add `http://localhost:8080/callback` as a redirect URI
-3. Copy your Client ID and Client Secret
+2. Add `http://127.0.0.1:8080/callback` as a redirect URI
+3. Copy your Client ID
 
 ```sh
-sp configure   # enter your credentials
+sp configure   # enter your Client ID
 sp login       # authenticate via browser
 ```
 
