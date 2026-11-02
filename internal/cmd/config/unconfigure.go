@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/matthew-collett/sp/internal/cmdutil"
 	"github.com/matthew-collett/sp/internal/config"
@@ -42,6 +43,9 @@ func NewCmdUnconfigure(f *factory.Factory) *cobra.Command {
 
 func runCmdUnconfigure(opts *unconfigureOpts) error {
 	if !opts.cfg.IsConfigured() {
+		if err := opts.cfg.Remove(); err != nil {
+			return fmt.Errorf("failed to cleanup configuration: %w", err)
+		}
 		ui.Warning("No configuration found").Show()
 		return nil
 	}
